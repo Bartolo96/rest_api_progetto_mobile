@@ -18,7 +18,7 @@ $app->get('/api/products/{code}', function (Request $request, Response $response
         $stmt->bindParam(':code',$code);
         if($stmt->execute()){
             $product = $stmt->fetchAll(PDO::FETCH_OBJ);
-            if(count($user)==1)
+            if(count($product)==1)
                 echo json_encode($product[0]);
             else 
                 echo '{"error" : {"code" : 111}}';
