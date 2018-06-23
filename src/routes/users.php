@@ -26,6 +26,61 @@ $app->post('/api/users/add', function (Request $request, Response $response) {
     
 });
 
+/**
+ * Get a specific user datas
+ */
+$app->post('/api/users/{id}', function (Request $request, Response $response) {
+    $id = $request->getAttribute('id');
+    $sql = 'SELECT * FROM  prova WHERE id = :id';
+    try{
+        //Get DB object 
+        $db = new db();
+        //Connect 
+        $db = $db->connect();
+        $stmt = $db->prepare($sql);
+
+        $stmt->bindParam(':id',$id);
+        if($stmt->execute()){
+            $user = $stmt->fetchAll(PDO::FETCH_OBJ);
+            if(count($user)==1)
+                echo json_encode($user[0]);
+            else 
+                echo '{"error" : {"code" : 111}}';
+        }
+    }catch(PDOException $e){
+        echo '{"error" : {"text" : '. $e->getMessage().'}';
+    }
+});
+
+/**
+ * Authenticate user
+ */
+$app->post('/api/users/authenticate', function (Request $request, Response $response) {
+    $email = $request->getParam('email');
+    $password = $request->getParam('password');
+    $sql = 'SELECT id FROM  prova WHERE email = :email AND password = :password';
+    try{
+        //Get DB object 
+        $db = new db();
+        //Connect 
+        $db = $db->connect();
+        $stmt = $db->prepare($sql);
+
+        $stmt->bindParam(':email',$email);
+        $stmt->bindParam(':password',$password);
+        if($stmt->execute()){
+            $user = $stmt->fetchAll(PDO::FETCH_OBJ);
+            if(count($user)==1)
+                echo '{"id":"'.$user->id.'"notice" : {"text" : "user authenticated"}}';
+            else 
+                echo '{"error" : {"code" : 111}}';
+        }
+    }catch(PDOException $e){
+        echo '{"error" : {"text" : '. $e->getMessage().'}';
+    }
+
+});
+
 
 //TO REMOVE
 $app->get('/api/users/show_users', function (Request $request, Response $response) {
