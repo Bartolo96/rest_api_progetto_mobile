@@ -3,7 +3,7 @@ use \Psr\Http\Message\ServerRequestInterface as Request;
 use \Psr\Http\Message\ResponseInterface as Response;
 
 /**
- * Add new user to the Database
+ * Get data reagrding product corresopnding to code sent 
 */
 $app->get('/api/products/{code}', function (Request $request, Response $response) {
     $code = $request->getAttribute('code');
@@ -26,4 +26,26 @@ $app->get('/api/products/{code}', function (Request $request, Response $response
     }catch(PDOException $e){
         echo '{"error" : {"text" : '. $e->getMessage().'}';
     }
+});
+
+/**
+ * Get all products on the database
+*/
+$app->get('/api/products', function (Request $request, Response $response) {
+    $sql = "SELECT * FROM products";
+    try {
+        //Get DB object 
+        $db = new db();
+        //Connect 
+        $db = $db->connect();
+
+        $stmt = $db->query($sql);
+        $users  = $stmt->fetchAll(PDO::FETCH_OBJ);
+        $db = null;
+        echo json_encode($users);
+
+    }catch(PDOException $e){
+        echo '{"error" : {"text" : '. $e->getMessage().'}';
+    }
+
 });

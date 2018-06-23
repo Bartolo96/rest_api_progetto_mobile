@@ -29,7 +29,7 @@ $app->post('/api/users/add', function (Request $request, Response $response) {
 /**
  * Get a specific user datas
  */
-$app->post('/api/users/{id}', function (Request $request, Response $response) {
+$app->get('/api/users/{id}', function (Request $request, Response $response) {
     $id = $request->getAttribute('id');
     $sql = 'SELECT * FROM  prova WHERE id = :id';
     try{
@@ -83,7 +83,7 @@ $app->post('/api/users/authenticate', function (Request $request, Response $resp
 
 
 //TO REMOVE
-$app->get('/api/users/show_users', function (Request $request, Response $response) {
+$app->get('/api/users', function (Request $request, Response $response) {
     $sql = "SELECT * FROM prova";
     try {
         //Get DB object 
