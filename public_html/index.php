@@ -24,5 +24,6 @@ $app = new Slim\App([
 
 //Routes
 require '../src/routes/users.php';
+require '../src/routes/products.php';
 
 $app->run();
