@@ -42,7 +42,7 @@ $app->get('/api/products', function (Request $request, Response $response) {
         $stmt = $db->query($sql);
         $users  = $stmt->fetchAll(PDO::FETCH_OBJ);
         $db = null;
-        echo json_encode($users);
+        echo '{"products_list": "'.json_encode($users).'"}';
 
     }catch(PDOException $e){
         echo '{"error" : {"text" : '. $e->getMessage().'}';
