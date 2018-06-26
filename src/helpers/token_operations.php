@@ -14,7 +14,7 @@ function is_valid_token ($token){
                 
                 $token = $stmt->fetchAll(PDO::FETCH_OBJ);
                 $timestamp = time();
-                if(($timestamp - $token->auth_token_timestamp) >= $validity){
+                if(($timestamp - $token[0]->auth_token_timestamp) >= $token[0]->validity){
                     return false;
                 }
                 else
@@ -25,6 +25,8 @@ function is_valid_token ($token){
             return '{"error" : {"text" : '. $e->getMessage().'}';
         }
     }
+    else
+        return 3;
 };
 
 function is_existent_token ($token){
@@ -62,9 +64,12 @@ function generate_auth_token($id){
         while(is_existent_token($token)){
             $token = bin2hex(random_bytes(16));    
         }
+        $time = time();
         $stmt->bindParam(':token',$token);
         $stmt->bindParam(':id',$id);
         $stmt->bindParam(':validity',$validity);
+        $stmt->bindParam(':timestamp',$time);
+        $stmt->execute();
         return '"auth_token":"'.$token.'", "validity":"'.$validity.'"';        
     }catch(PDOException $e){
         return '{"error" : {"text" : '. $e->getMessage().'}';

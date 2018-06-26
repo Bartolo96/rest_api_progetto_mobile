@@ -5,6 +5,7 @@ use \Psr\Http\Message\ResponseInterface as Response;
 /**
  * Get data reagrding product corresopnding to code sent 
 */
+
 $app->get('/api/products/{code}', function (Request $request, Response $response) {
     $code = $request->getAttribute('code');
     $sql = 'SELECT * FROM products WHERE code = :code';
@@ -42,10 +43,9 @@ $app->get('/api/products', function (Request $request, Response $response) {
         $stmt = $db->query($sql);
         $users  = $stmt->fetchAll(PDO::FETCH_OBJ);
         $db = null;
-        echo '{"products_list": "'.json_encode($users).'"}';
+        echo json_encode($users);
 
     }catch(PDOException $e){
         echo '{"error" : {"text" : '. $e->getMessage().'}';
     }
-
-});
+})->add($middleware);

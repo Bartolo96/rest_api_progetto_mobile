@@ -5,7 +5,6 @@ use \Psr\Http\Message\ResponseInterface as Response;
 require '../vendor/autoload.php';
 require '../src/config/db.php';
 require '../src/helpers/token_operations.php';
-
 $app = new Slim\App([
     'settings' => [
         'displayErrorDetails' => true,
@@ -16,11 +15,18 @@ $app = new Slim\App([
 
 //Middleware
 $middleware = function ($request,$response,$next){
-    if ($request->hasHeader('auth_token') && is_token_valid($request->getHeader('auth_token')[0])) {
-        $response = $next($request,$response);
+    
+    if ($request->hasHeader('Auth-Token')){
+        $token = implode($request->getHeader('Auth-Token'),'');
+        if(is_valid_token($token)){
+            $response = $next($request,$response);
+        }
+        else
+            $response->getBody()->write('{"Error":"Invalid token provided"}');   
     }
     else
-        $response->getBody()->write('{"Error":"Invalid token provided"}');   
+        $response->getBody()->write('{"Error":"No token provided"}');  
+    
     return $response;
 };
 
