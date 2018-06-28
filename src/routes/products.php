@@ -27,7 +27,7 @@ $app->get('/api/products/{code}', function (Request $request, Response $response
     }catch(PDOException $e){
         echo '{"error" : {"text" : '. $e->getMessage().'}';
     }
-});
+})->add($middleware);;
 
 /**
  * Get all products on the database

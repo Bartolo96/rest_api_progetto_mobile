@@ -50,11 +50,11 @@ $app->get('/api/users/{id}', function (Request $request, Response $response) {
     }catch(PDOException $e){
         echo '{"error" : {"text" : '. $e->getMessage().'}';
     }
-});
+})->add($middleware);;
 
 //TO REMOVE
 $app->get('/api/users', function (Request $request, Response $response) {
-    $sql = "SELECT * FROM prova";
+    $sql = "SELECT id,email FROM prova";
     try {
         //Get DB object 
         $db = new db();
@@ -70,4 +70,4 @@ $app->get('/api/users', function (Request $request, Response $response) {
         echo '{"error" : {"text" : '. $e->getMessage().'}';
     }
 
-});
+})->add($middleware);;

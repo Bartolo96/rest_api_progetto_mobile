@@ -1,31 +1,16 @@
 <?php
-use \Psr\Http\Message\ServerRequestInterface as Request;
-use \Psr\Http\Message\ResponseInterface as Response;
+    class db{
+        //Properties
+        private $dbhost = 'localhost';
+        private $dbuser = 'id6273005_nitwx';
+        private $dbpass = 'xyjXb$j6mtYDKyBSEtzP';
+        private $dbname = 'id6273005_nitwx_progetto_mobile';
 
-require '../vendor/autoload.php';
-require '../src/config/db.php';
-require '../src/helpers/token_operations.php';
-$app = new Slim\App([
-    'settings' => [
-        'displayErrorDetails' => true,
-        'debug'               => true,
-        'whoops.editor'       => 'sublime',
-    ]
-]);
+        //Connect
+        public function connect (){
+           $dbConnection = new PDO('mysql:host='.$this->dbhost.';dbname='.$this->dbname, $this->dbuser, $this->dbpass);
+           $dbConnection->setAttribute(PDO::ATTR_ERRMODE,PDO::ERRMODE_EXCEPTION);
+           return $dbConnection;
+        }
 
-//Middleware
-$middleware = function ($request,$response,$next){
-    if ($request->hasHeader('auth_token') && is_token_valid($request->getHeader('auth_token')[0])) {
-        $response = $next($request,$response);
     }
-    else
-        $response->getBody()->write('{"Error":"Invalid token provided"}');   
-    return $response;
-};
-
-//Routes
-require '../src/routes/auth.php';
-require '../src/routes/users.php';
-require '../src/routes/products.php';
-
-$app->run();
