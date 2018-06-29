@@ -12,6 +12,7 @@ class ComposerStaticInita48165ea0d8babdde34f6e506953718b
         '37a3dc5111fe8f707ab4c132ef1dbc62' => __DIR__ . '/..' . '/guzzlehttp/guzzle/src/functions_include.php',
         '253c157292f75eb38082b5acb06f3f01' => __DIR__ . '/..' . '/nikic/fast-route/src/functions.php',
         'decc78cc4436b1292c6c0d151b19445c' => __DIR__ . '/..' . '/phpseclib/phpseclib/phpseclib/bootstrap.php',
+        'c65d09b6820da036953a371c8c73a9b1' => __DIR__ . '/..' . '/facebook/graph-sdk/src/Facebook/polyfills.php',
     );
 
     public static $prefixLengthsPsr4 = array (
@@ -49,6 +50,7 @@ class ComposerStaticInita48165ea0d8babdde34f6e506953718b
         array (
             'Firebase\\JWT\\' => 13,
             'FastRoute\\' => 10,
+            'Facebook\\' => 9,
         ),
     );
 
@@ -108,6 +110,10 @@ class ComposerStaticInita48165ea0d8babdde34f6e506953718b
         'FastRoute\\' => 
         array (
             0 => __DIR__ . '/..' . '/nikic/fast-route/src',
+        ),
+        'Facebook\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/facebook/graph-sdk/src/Facebook',
         ),
     );
 

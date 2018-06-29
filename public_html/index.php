@@ -2,9 +2,13 @@
 use \Psr\Http\Message\ServerRequestInterface as Request;
 use \Psr\Http\Message\ResponseInterface as Response;
 
-require '../vendor/autoload.php';
+
+require_once '../vendor/autoload.php';
+require_once '../vendor/facebook/graph-sdk/src/Facebook/autoload.php';
+require '../src/config/constants.php';
 require '../src/config/db.php';
-require '../src/helpers/token_operations.php';
+require '../src/helpers/helper_operations.php';
+
 $app = new Slim\App([
     'settings' => [
         'displayErrorDetails' => true,
@@ -12,6 +16,7 @@ $app = new Slim\App([
         'whoops.editor'       => 'sublime',
     ]
 ]);
+
 
 //Middleware
 $middleware = function ($request,$response,$next){
