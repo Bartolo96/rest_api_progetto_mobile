@@ -41,7 +41,6 @@ $app->post('/api/users/add', function (Request $request, Response $response) {
         echo '{"code" : 10}';
     }
 
-    
 });
 
 /**

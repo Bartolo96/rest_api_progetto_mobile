@@ -33,6 +33,7 @@ $app->get('/api/products/{code}', function (Request $request, Response $response
  * Get all products on the database
 */
 $app->get('/api/products', function (Request $request, Response $response) {
+    $responseBody = $response->getBody();
     $sql = "SELECT * FROM products";
     try {
         //Get DB object 
@@ -41,11 +42,26 @@ $app->get('/api/products', function (Request $request, Response $response) {
         $db = $db->connect();
 
         $stmt = $db->query($sql);
-        $users  = $stmt->fetchAll(PDO::FETCH_OBJ);
+        $products  = $stmt->fetchAll(PDO::FETCH_OBJ);
         $db = null;
-        echo json_encode($users);
-
+        $responseBody->write(json_encode($products));
     }catch(PDOException $e){
         echo '{"error" : {"text" : '. $e->getMessage().'}';
     }
 })->add($middleware);
+
+$app->get('/api/old_products', function (Request $request, Response $response) {
+    $sql = "SELECT * FROM products";
+    try {
+        //Get DB object 
+        $db = new db();
+        //Connect 
+        $db = $db->connect();
+        $stmt = $db->query($sql);
+        $users  = $stmt->fetchAll(PDO::FETCH_OBJ);
+        $db = null;
+        echo json_encode($users);
+    }catch(PDOException $e){
+        echo '{"error" : {"text" : '. $e->getMessage().'}';
+    }
+})->add($old_middleware);

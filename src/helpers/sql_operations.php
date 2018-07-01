@@ -114,9 +114,9 @@ function authenticate_third_party_users($email,$user_type){
     $stmt->bindParam(':email',$email);
     $stmt->bindParam(':user_type',$user_type);
     if($stmt->execute()){
-        $user = $stmt->fetchAll(PDO::FETCH_OBJ);
+        $users = $stmt->fetchAll(PDO::FETCH_OBJ);
         //If it does not exist create the user
-        if(count($user)==0){
+        if(count($users)==0){
             //Get DB object 
             $db = new db();
             //Connect 
@@ -127,13 +127,11 @@ function authenticate_third_party_users($email,$user_type){
             if($stmt->execute()){
             
             }
-           
         }
         //Generate Tokens 
-        $auth_token = generate_auth_token("email",$email,$user_type);
-        if($auth_token != false){
-            $refresh_token = generate_refresh_token("email",$email,$user_type);
-            return '{"authtoken":"'.$auth_token.'","refreshtoken":"'.$refresh_token.'"}';
-        }  
+        $access_token = generate_jwt_token(['id'=>$users[0]->id,'user_type'=>$user[0]->user_type],ACCESS_TOKEN_TYPE);
+        $refresh_token = generate_jwt_token(['id'=>$users[0]->id,'token'=>generate_refresh_token("email",$email,$user_type),'user_type'=>$user[0]->user_type],REFRESH_TOKEN_TYPE);
+        return json_encode([ACCESS_TOKEN => $access_token,REFRESH_TOKEN => $refresh_token]);
+         
     }
 };
