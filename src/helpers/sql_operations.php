@@ -1,88 +1,6 @@
 <?php
-function is_valid_token ($token){
-    if(is_existent_token($token)){
-        $sql = 'SELECT auth_token_timestamp, validity FROM users WHERE auth_token = :token';
-        try{
-            
-            //Get DB object 
-            $db = new db();
-            //Connect 
-            $db = $db->connect();
-            $stmt = $db->prepare($sql);
-            $stmt->bindParam(':token',$token);
-            if($stmt->execute()){
-                
-                $token = $stmt->fetchAll(PDO::FETCH_OBJ);
-                $timestamp = time();
-                if(($timestamp - $token[0]->auth_token_timestamp) >= $token[0]->validity){
-                    return false;
-                }
-                else
-                    return true;
-            }
-           
-        }catch(PDOException $e){
-            return '{"error" : {"text" : '. $e->getMessage().'}';
-        }
-    }
-    else
-        return false;
-};
 
-function is_existent_token ($token){
-    $sql = 'SELECT * FROM users WHERE auth_token = :token';
-    try{
-        //Get DB object 
-        $db = new db();
-        //Connect 
-        $db = $db->connect();
-        $stmt = $db->prepare($sql);
-        $stmt->bindParam(':token',$token);
-        
-        if($stmt->execute()){
-            $user = $stmt->fetchAll(PDO::FETCH_OBJ);
-            if(count($user)==1)
-                return true;
-            else 
-                return false;
-        }
-    }catch(PDOException $e){
-        return '{"error" : {"text" : '. $e->getMessage().'}';
-    }
-};
-
-function generate_auth_token($key_name,$key_value,$user_type){
-    $sql = 'UPDATE users SET auth_token = :token, auth_token_timestamp = :timestamp, validity = :validity  
-                WHERE '.$key_name.' = :key_value AND user_type = :user_type';
-    try{
-        //Get DB object 
-        $db = new db();
-        //Connect 
-        $db = $db->connect();
-        $stmt = $db->prepare($sql);
-        $token = bin2hex(random_bytes(16));
-        $validity = 3600;
-        while(is_existent_token($token)){
-            $token = bin2hex(random_bytes(16));    
-        }
-        $time = time();
-        $stmt->bindParam(':token',$token);
-        $stmt->bindParam(':key_value',$key_value);
-        $stmt->bindParam(':user_type',$user_type);
-        $stmt->bindParam(':validity',$validity);
-        $stmt->bindParam(':timestamp',$time);
-        if ($stmt->execute()) {
-            return $token;
-        }
-        else
-            return false;
-               
-    }catch(PDOException $e){
-        return '{"error" : {"text" : '. $e->getMessage().'}';
-    }    
-};
-
-function generate_refresh_token($key_name,$key_value,$user_type = 1 ){
+function generate_refresh_token($key_name,$key_value,$user_type){
     $sql = 'UPDATE users SET refresh_token =:token WHERE '.$key_name.' = :key_value AND user_type = :user_type';
     try{
         //Get DB object 
@@ -106,7 +24,7 @@ function generate_refresh_token($key_name,$key_value,$user_type = 1 ){
 };
 function authenticate_third_party_users($email,$user_type){
     //Check if given user already exists
-    $sql = 'SELECT id FROM users WHERE email = :email AND user_type = :user_type';
+    $sql = 'SELECT * FROM users WHERE email = :email AND user_type = :user_type';
     $sql2 = 'INSERT INTO users(email,user_type) VALUES(:email,:user_type)';
     $db = new db();
     $db = $db->connect();
@@ -114,9 +32,9 @@ function authenticate_third_party_users($email,$user_type){
     $stmt->bindParam(':email',$email);
     $stmt->bindParam(':user_type',$user_type);
     if($stmt->execute()){
-        $users = $stmt->fetchAll(PDO::FETCH_OBJ);
+        $user = $stmt->fetchAll(PDO::FETCH_OBJ);
         //If it does not exist create the user
-        if(count($users)==0){
+        if(count($user)==0){
             //Get DB object 
             $db = new db();
             //Connect 
@@ -128,10 +46,32 @@ function authenticate_third_party_users($email,$user_type){
             
             }
         }
+        $stmt = $db->prepare($sql);
+        $stmt->bindParam(':email',$email);
+        $stmt->bindParam(':user_type',$user_type);
         //Generate Tokens 
-        $access_token = generate_jwt_token(['id'=>$users[0]->id,'user_type'=>$user[0]->user_type],ACCESS_TOKEN_TYPE);
-        $refresh_token = generate_jwt_token(['id'=>$users[0]->id,'token'=>generate_refresh_token("email",$email,$user_type),'user_type'=>$user[0]->user_type],REFRESH_TOKEN_TYPE);
-        return json_encode([ACCESS_TOKEN => $access_token,REFRESH_TOKEN => $refresh_token]);
+        if($stmt->execute()){
+            $user = $stmt->fetchAll(PDO::FETCH_OBJ);
+            $signedAccessToken = generate_jwt_token(['id'=>$user[0]->id,
+                                                    'user_type'=>$user[0]->user_type,
+                                                    'points'=>$user[0]->points,
+                                                    'gender'=>$user[0]->gender,
+                                                    'birth_date'=>$user[0]->birth_date,
+                                                    'email'=>$user[0]->email],
+                                                    ACCESS_TOKEN_TYPE);
+            $refreshToken = generate_refresh_token('email',$email,$user[0]->user_type);
+
+            $signedRefreshToken = generate_jwt_token(['id'=>$user[0]->id,
+                                                    'token'=>$refreshToken,
+                                                    'user_typee'=>$user[0]->user_type]
+                                                    ,  REFRESH_TOKEN_TYPE);
+            
+            return json_encode([ACCESS_TOKEN => [ACCESS_TOKEN=>$signedAccessToken,'token_type' => 'Bearer','expires_in' => 3600],
+                                REFRESH_TOKEN => [REFRESH_TOKEN =>$signedRefreshToken, 'token_type' => 'Bearer']]);
          
+        }
+        else
+            return false;
+        
     }
 };

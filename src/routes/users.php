@@ -43,48 +43,52 @@ $app->post('/api/users/add', function (Request $request, Response $response) {
 
 });
 
-/**
+
+
+
+/*
  * Get a specific user datas
- */
-$app->get('/api/users/{id}', function (Request $request, Response $response) {
-    $id = $request->getAttribute('id');
-    $sql = 'SELECT * FROM  prova WHERE id = :id';
-    try{
-        //Get DB object 
-        $db = new db();
-        //Connect 
-        $db = $db->connect();
-        $stmt = $db->prepare($sql);
+ 
+    $app->get('/api/users/{id}', function (Request $request, Response $response) {
+        $id = $request->getAttribute('id');
+        $sql = 'SELECT email FROM  prova WHERE id = :id';
+        try{
+            //Get DB object 
+            $db = new db();
+            //Connect 
+            $db = $db->connect();
+            $stmt = $db->prepare($sql);
 
-        $stmt->bindParam(':id',$id);
-        if($stmt->execute()){
-            $user = $stmt->fetchAll(PDO::FETCH_OBJ);
-            if(count($user)==1)
-                echo json_encode($user[0]);
-            else 
-                echo '{"error" : {"code" : 111}}';
+            $stmt->bindParam(':id',$id);
+            if($stmt->execute()){
+                $user = $stmt->fetchAll(PDO::FETCH_OBJ);
+                if(count($user)==1)
+                    echo json_encode($user[0]);
+                else 
+                    echo '{"error" : {"code" : 111}}';
+            }
+        }catch(PDOException $e){
+            echo '{"error" : {"text" : '. $e->getMessage().'}';
         }
-    }catch(PDOException $e){
-        echo '{"error" : {"text" : '. $e->getMessage().'}';
-    }
-})->add($middleware);;
+    })->add($resource_middleware);;
 
-//TO REMOVE
-$app->get('/api/users', function (Request $request, Response $response) {
-    $sql = "SELECT id,email FROM prova";
-    try {
-        //Get DB object 
-        $db = new db();
-        //Connect 
-        $db = $db->connect();
 
-        $stmt = $db->query($sql);
-        $users  = $stmt->fetchAll(PDO::FETCH_OBJ);
-        $db = null;
-        echo json_encode($users);
+    $app->get('/api/users', function (Request $request, Response $response) {
+        $sql = "SELECT id,email FROM prova";
+        try {
+            //Get DB object 
+            $db = new db();
+            //Connect 
+            $db = $db->connect();
 
-    }catch(PDOException $e){
-        echo '{"error" : {"text" : '. $e->getMessage().'}';
-    }
+            $stmt = $db->query($sql);
+            $users  = $stmt->fetchAll(PDO::FETCH_OBJ);
+            $db = null;
+            echo json_encode($users);
 
-})->add($middleware);;
+        }catch(PDOException $e){
+            echo '{"error" : {"text" : '. $e->getMessage().'}';
+        }
+
+    })->add($resource_middleware);;
+**/

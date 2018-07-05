@@ -22,18 +22,22 @@ $app = new Slim\App([
 
 //Middleware for functions after user is authenticated
 
-$middleware = function ($request, $response, $next) {
+$resource_middleware_get = function ($request, $response, $next) {
     if($request->hasHeader('Authorization')){
         $token = preg_split('/ /',implode($request->getHeader('Authorization')))[1];
         if($token!=null){
             try{
                 $decode_token = decode_jwt_token($token);
                 $request = $request->withParsedBody($decode_token);
-                $response = $next($request, $response);
-                $response = $response->withHeader('Content-type', 'application/json');
-                $response = $response->withStatus(202,'OK');
-
-            }catch(ExpiredException|SignatureInvalidException $e){
+                if($request->getParam('scope') === 'resources'){
+                    $response = $next($request, $response);
+                    $response = $response->withHeader('Content-type', 'application/json');
+                }
+                else {
+                    $response = $response->withHeader('WWW-Authenticate','http://nitwx.000webhostapp.com');
+                    $response = $response->withStatus(401,'Unauthorized');
+                }
+            }catch(ExpiredException|SignatureInvalidException|UnexpectedValueException $e){
                 $response = $response->withHeader('WWW-Authenticate','http://nitwx.000webhostapp.com');
                 $response = $response->withStatus(401,'Unauthorized');
             }
@@ -54,29 +58,79 @@ $middleware = function ($request, $response, $next) {
     return $response;
 };
 
-//Middleware
-$old_middleware = function ($request,$response,$next){
-    
-    if ($request->hasHeader('authtoken')){
-        $token = implode($request->getHeader('authtoken'),'');
-        if(is_valid_token($token)){
-            $response = $next($request,$response);
+$transaction_midlleware_post = function($request, $response, $next){
+    if($request->hasHeader('Authorization')){
+        $token = preg_split('/ /',implode($request->getHeader('Authorization')))[1];
+        if($token!=null){
+            try{
+                $decode_token = decode_jwt_token($token);
+                $requestBody = array_merge($request->getParsedBody(),$decode_token);
+                $request = $request->withParsedBody($requestBody);
+                if($request->getParam('scope') === 'resources'){
+                    $response = $next($request, $response);
+                    $response = $response->withHeader('Content-type', 'application/json');
+                }
+                else {
+                    $response = $response->withHeader('WWW-Authenticate','http://nitwx.000webhostapp.com');
+                    $response = $response->withStatus(401,'Unauthorized');
+                }
+            }catch(ExpiredException|SignatureInvalidException|UnexpectedValueException $e){
+                $response = $response->withHeader('WWW-Authenticate','http://nitwx.000webhostapp.com');
+                $response = $response->withStatus(401,'Unauthorized');
+            }
         }
-        else
-            $response->getBody()->write('{"Error":"Invalid token provided '.$token.'"}');   
+        else{
+            $response = $response->withHeader('WWW-Authenticate','http://nitwx.000webhostapp.com');
+            $response = $response->withStatus(400,'Bad Request');
+        }
     }
-    else
-        $response->getBody()->write('{"Error":"No token provided"}');  
-    
-    $response = $response->withHeader('Content-type', 'application/json');
+    else{
+        $response = $response->withHeader('WWW-Authenticate','http://nitwx.000webhostapp.com');
+        $response = $response->withStatus(400,'Bad Request');
+    }
     return $response;
-        $response->getBody()->write('{"Error":"You are not authorized"}');
-    $new_response = $response->withHeader('Content-type', 'application/json');
-    return $new_response;
 };
+//Middleware
+$refresh_middleware = function ($request,$response,$next){
+    if($request->hasHeader('Authorization')){
+        $token = preg_split('/ /',implode($request->getHeader('Authorization')))[1];
+        if($token!=null){
+            try{
+                $decode_token = decode_jwt_token($token);
+                $request = $request->withParsedBody($decode_token);
+                if($request->getParam('scope') === 'refresh'){
+                    $response = $next($request, $response);
+                    $response = $response->withHeader('Content-type', 'application/json');
+                }
+                else {
+                    $response = $response->withHeader('WWW-Authenticate','http://nitwx.000webhostapp.com');
+                    $response = $response->withStatus(401,'Unauthorized');
+                }
+            }catch(ExpiredException|SignatureInvalidException|UnexpectedValueException $e){
+                $response = $response->withHeader('WWW-Authenticate','http://nitwx.000webhostapp.com');
+                $response = $response->withStatus(401,'Unauthorized');
+            }
+            /* catch(SignatureInvalidException $e){
+                $new_response = $response->withHeader('','http://nitwx.000webhostapp.com');
+                $new_response->withStatus(401);
+            } */
+        }
+        else{
+            $response = $response->withHeader('WWW-Authenticate','http://nitwx.000webhostapp.com');
+            $response = $response->withStatus(400,'Bad Request');
+        }
+    }
+    else{
+        $response = $response->withHeader('WWW-Authenticate','http://nitwx.000webhostapp.com');
+        $response = $response->withStatus(400,'Bad Request');
+    }
+    return $response;
+};
+
 
 //Routes
 require '../src/routes/auth.php';
+require '../src/routes/offers.php';
 require '../src/routes/users.php';
 require '../src/routes/products.php';
 
