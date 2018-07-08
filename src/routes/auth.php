@@ -117,7 +117,8 @@ $app->get('/auth/refresh_access_token', function (Request $request, Response $re
     $responseBody = $response->getBody();
     $token = $request->getParam(REFRESH_TOKEN);
     $id = $request->getParam('id');
-    $sql = 'SELECT users.id,users.email,users.user_type,users.gender,users.points,users.birth_date,users.email FROM users WHERE refresh_token = :token AND id = :id';
+    $sql = 'SELECT users.id,users.email,users.user_type,users.gender,users.points,users.birth_date,users.email FROM users 
+                    WHERE refresh_token = :token AND id = :id';
     try{
         //Get DB object 
         $db = new db();

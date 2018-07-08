@@ -5,7 +5,7 @@
         if($tokenType === REFRESH_TOKEN_TYPE)
             $payload = array_merge($payload,['iss'=>'nitwx','iat'=>time(),'scope' =>'refresh']);
         else
-            $payload = array_merge($payload,['iss'=>'nitwx','iat'=>time(),'scope' =>'resources','exp'=>time()+3600]);
+            $payload = array_merge($payload,['iss'=>'nitwx','iat'=>time(),'scope' =>'resources','exp'=>time()+ACCESS_TOKEN_DURATION]);
         $jwt = JWT::encode($payload, PRIVATE_KEY,'RS256');
         return $jwt;
     }

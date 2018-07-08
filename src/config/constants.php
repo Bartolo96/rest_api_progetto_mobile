@@ -36,5 +36,6 @@ EOD;
 const REFRESH_TOKEN_TYPE = 1;
 const ACCESS_TOKEN_TYPE = 2;
 
+const ACCESS_TOKEN_DURATION = 3600;
 const ACCESS_TOKEN = "access_token";
 const REFRESH_TOKEN = "refresh_token";

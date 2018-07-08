@@ -129,6 +129,7 @@ $refresh_middleware = function ($request,$response,$next){
 
 
 //Routes
+require '../src/routes/stores.php';
 require '../src/routes/auth.php';
 require '../src/routes/offers.php';
 require '../src/routes/users.php';

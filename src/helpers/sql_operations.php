@@ -62,8 +62,8 @@ function authenticate_third_party_users($email,$user_type){
             $refreshToken = generate_refresh_token('email',$email,$user[0]->user_type);
 
             $signedRefreshToken = generate_jwt_token(['id'=>$user[0]->id,
-                                                    'token'=>$refreshToken,
-                                                    'user_typee'=>$user[0]->user_type]
+                                                    REFRESH_TOKEN=>$refreshToken,
+                                                    'user_type'=>$user[0]->user_type]
                                                     ,  REFRESH_TOKEN_TYPE);
             
             return json_encode([ACCESS_TOKEN => [ACCESS_TOKEN=>$signedAccessToken,'token_type' => 'Bearer','expires_in' => 3600],
