@@ -8,10 +8,11 @@ use \Psr\Http\Message\ResponseInterface as Response;
 
 $app->get('/api/offers', function (Request $request, Response $response) {
     $responseBody=$response->getBody();
-    $sqlOffers = 'SELECT * FROM offers';
+    $currentTime = time();
+    $sqlOffers = 'SELECT * FROM offers WHERE validity_start< :currentTime AND validity_end> :currentTime';
     $sqlProducts = 'SELECT products.id,products.name,products.description,products.price,products.code,quantity FROM 
                             (offers_products JOIN products ON offers_products.product_id = products.id) 
-                            WHERE offers_products.offer_id = :id';
+                            WHERE offers_products.offer_id = :id ';
 
     
     try {
@@ -20,7 +21,7 @@ $app->get('/api/offers', function (Request $request, Response $response) {
         //Connect 
         $db = $db->connect();
         $stmt = $db->prepare($sqlOffers);
-        
+        $stmt->bindParam('currentTime',$currentTime);
         if($stmt->execute()){
             $offers = $stmt->fetchAll(PDO::FETCH_OBJ);
             foreach($offers as $offer){
@@ -29,8 +30,7 @@ $app->get('/api/offers', function (Request $request, Response $response) {
                 if($stmt->execute()){
                     $offer->product_list =  $stmt->fetchAll(PDO::FETCH_OBJ);
                 }
-            }
-            
+            }  
         }   
         
         $responseBody->write(json_encode($offers));

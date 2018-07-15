@@ -11,7 +11,7 @@ $app->post('/auth/authenticate_user', function ($request, $response) {
     $password = $request->getParam('password');
     $remember_me = $request->getParam('remember_me');
     
-    $sql = 'SELECT users.id,users.email,users.user_type,users.gender,users.points,users.birth_date FROM  
+    $sql = 'SELECT users.id,users.email,users.user_type,users.gender,users.points,users.birth_date,users.last_time_played FROM  
                     (users JOIN registered_users ON users.id = registered_users.id AND user_type = :user_type)
                             WHERE email = :email AND password = :password';
     try{
@@ -31,6 +31,7 @@ $app->post('/auth/authenticate_user', function ($request, $response) {
                 $signedAccessToken = generate_jwt_token(['id'=>$user[0]->id,
                                                         'user_type'=>$user[0]->user_type,
                                                         'points'=>$user[0]->points,
+                                                        'last_time_played'=>$user[0]->last_time_played,
                                                         'gender'=>$user[0]->gender,
                                                         'birth_date'=>$user[0]->birth_date,
                                                         'email'=>$user[0]->email],
@@ -91,7 +92,7 @@ $app->post('/auth/authenticate_third_party_user', function (Request $request, Re
                 'default_graph_version' => 'v2.10' // optional
             ]);
             try {
-                $fbResponse = $facebook->get('/me?fields=id,user_gender,email', $token);
+                $fbResponse = $facebook->get('/me?fields=id,email', $token);
                
             } catch(Facebook\Exceptions\FacebookResponseException $e) {
                 echo 'Graph returned an error: ' . $e->getMessage();
@@ -117,7 +118,7 @@ $app->get('/auth/refresh_access_token', function (Request $request, Response $re
     $responseBody = $response->getBody();
     $token = $request->getParam(REFRESH_TOKEN);
     $id = $request->getParam('id');
-    $sql = 'SELECT users.id,users.email,users.user_type,users.gender,users.points,users.birth_date,users.email FROM users 
+    $sql = 'SELECT users.id,users.email,users.user_type,users.gender,users.points,users.birth_date,users.email,users.last_time_played FROM users 
                     WHERE refresh_token = :token AND id = :id';
     try{
         //Get DB object 
@@ -134,6 +135,7 @@ $app->get('/auth/refresh_access_token', function (Request $request, Response $re
                 $signedAccessToken = generate_jwt_token(['id'=>$user[0]->id,
                                                         'user_type'=>$user[0]->user_type,
                                                         'points'=>$user[0]->points,
+                                                        'last_time_played'=>$user[0]->last_time_played,
                                                         'gender'=>$user[0]->gender,
                                                         'birth_date'=>$user[0]->birth_date,
                                                         'email'=>$user[0]->email],

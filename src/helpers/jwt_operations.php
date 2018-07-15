@@ -4,8 +4,10 @@
     function generate_jwt_token($payload,$tokenType){
         if($tokenType === REFRESH_TOKEN_TYPE)
             $payload = array_merge($payload,['iss'=>'nitwx','iat'=>time(),'scope' =>'refresh']);
-        else
+        elseif($tokenType === ACCESS_TOKEN_TYPE)
             $payload = array_merge($payload,['iss'=>'nitwx','iat'=>time(),'scope' =>'resources','exp'=>time()+ACCESS_TOKEN_DURATION]);
+        else
+            $payload = array_merge($payload,['iss'=>'nitwx','iat'=>time(),'scope' =>'transaction']);
         $jwt = JWT::encode($payload, PRIVATE_KEY,'RS256');
         return $jwt;
     }

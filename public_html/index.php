@@ -58,14 +58,15 @@ $resource_middleware_get = function ($request, $response, $next) {
     return $response;
 };
 
-$transaction_midlleware_post = function($request, $response, $next){
+$resource_midlleware_post = function($request, $response, $next){
     if($request->hasHeader('Authorization')){
         $token = preg_split('/ /',implode($request->getHeader('Authorization')))[1];
         if($token!=null){
             try{
                 $decode_token = decode_jwt_token($token);
-                $requestBody = array_merge($request->getParsedBody(),$decode_token);
+                $requestBody = array_merge($request->getParsedBody(),(array)$decode_token);
                 $request = $request->withParsedBody($requestBody);
+
                 if($request->getParam('scope') === 'resources'){
                     $response = $next($request, $response);
                     $response = $response->withHeader('Content-type', 'application/json');
@@ -77,6 +78,7 @@ $transaction_midlleware_post = function($request, $response, $next){
             }catch(ExpiredException|SignatureInvalidException|UnexpectedValueException $e){
                 $response = $response->withHeader('WWW-Authenticate','http://nitwx.000webhostapp.com');
                 $response = $response->withStatus(401,'Unauthorized');
+                
             }
         }
         else{
@@ -129,6 +131,7 @@ $refresh_middleware = function ($request,$response,$next){
 
 
 //Routes
+require '../src/routes/transactions.php';
 require '../src/routes/stores.php';
 require '../src/routes/auth.php';
 require '../src/routes/offers.php';
