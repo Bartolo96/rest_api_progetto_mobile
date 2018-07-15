@@ -78,7 +78,7 @@ $app->post('/auth/authenticate_third_party_user', function (Request $request, Re
                     $responseBody->write(authenticate_third_party_users($email,$user_type)); 
             
                 }catch(PDOException $e){
-                    $response = $response->withStatus('418',e.getMessage());
+                    $response->getBody()->write($e->getMessage());
                 }
             } else {
                 // Invalid ID token
